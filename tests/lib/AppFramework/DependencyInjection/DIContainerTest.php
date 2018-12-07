@@ -29,6 +29,7 @@ namespace Test\AppFramework\DependencyInjection;
 
 use OC\AppFramework\DependencyInjection\DIContainer;
 use \OC\AppFramework\Http\Request;
+use OC\AppFramework\Middleware\Security\SecurityMiddleware;
 use OCP\AppFramework\QueryException;
 use OCP\IConfig;
 use OCP\Security\ISecureRandom;
@@ -73,10 +74,17 @@ class DIContainerTest extends \Test\TestCase {
 			$this->createMock(ISecureRandom::class),
 			$this->createMock(IConfig::class)
 		);
-		$security = $this->container['SecurityMiddleware'];
 		$dispatcher = $this->container['MiddlewareDispatcher'];
+		$middlewares = $dispatcher->getMiddlewares();
 
-		$this->assertContains($security, $dispatcher->getMiddlewares());
+		$found = false;
+		foreach ($middlewares as $middleware) {
+			if ($middleware instanceof SecurityMiddleware) {
+				$found = true;
+			}
+		}
+
+		$this->assertTrue($found);
 	}
 
 	public function testInvalidAppClass() {
